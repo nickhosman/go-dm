@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 type User struct {
@@ -86,8 +87,24 @@ func newClass(id int, name string, hitdie int, features []Feature) Class {
 }
 
 func main() {
-	startDB()
+	const file string = "dm.db"
 
+	db, err := sql.Open("sqlite3", file)
+	if err != nil {
+		return
+	}
+
+	insert := `INSERT INTO features (name, description, lvl)
+	VALUES(?, ?, ?)`
+	name := "Ability Score Improvement"
+	description := "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
+	lvl := 4
+
+	_, err = db.Exec(insert, name, description, lvl)
+	if err != nil {
+		return
+	}
+	
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -117,20 +134,4 @@ func main() {
 	})
 
 	e.Logger.Fatal(e.Start(":4000"))
-}
-
-func startDB() {
-	const file string = "dm.db"
-
-	db, _ := sql.Open("sqlite3", file)
-
-	const create string = `
-	CREATE TABLE IF NOT EXISTS features (
-		id INTEGER NOT NULL PRIMARY KEY,
-		name TEXT NOT NULL,
-		description TEXT,
-		lvl INTEGER
-	);`
-
-	db.Exec(create)
 }
