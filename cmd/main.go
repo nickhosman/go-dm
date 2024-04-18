@@ -86,6 +86,8 @@ func newClass(id int, name string, hitdie int, features []Feature) Class {
 }
 
 func main() {
+	startDB()
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -120,6 +122,8 @@ func main() {
 func startDB() {
 	const file string = "dm.db"
 
+	db, _ := sql.Open("sqlite3", file)
+
 	const create string = `
 	CREATE TABLE IF NOT EXISTS features (
 		id INTEGER NOT NULL PRIMARY KEY,
@@ -127,4 +131,6 @@ func startDB() {
 		description TEXT,
 		lvl INTEGER
 	);`
+
+	db.Exec(create)
 }
