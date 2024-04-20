@@ -84,18 +84,7 @@ func newClass(id int, name string, hitdie int, features []Feature) Class {
 func main() {
 	const file string = "dm.db"
 
-	db, err := sql.Open("sqlite3", file)
-	if err != nil {
-		return
-	}
-
-	insert := `INSERT INTO features (name, description, lvl)
-	VALUES(?, ?, ?)`
-	name := "Ability Score Improvement"
-	description := "When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can increase one ability score of your choice by 2, or you can increase two ability scores of your choice by 1. As normal, you can't increase an ability score above 20 using this feature."
-	lvl := 4
-
-	_, err = db.Exec(insert, name, description, lvl)
+	db, err := openDB(file)
 	if err != nil {
 		return
 	}
@@ -115,5 +104,44 @@ func main() {
 		return c.JSON(http.StatusOK, char)
 	})
 
+	e.GET("/features/:id", func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			return err
+		}
+
+		stmt := `SELECT id, name, description, lvl FROM features WHERE id = ` + strconv.Itoa(id)
+
+		f := db.QueryRow(stmt)
+
+		err = f.Err()
+		if err != nil {
+			return c.JSON(http.StatusNotFound, newMessage("Feature not found."))
+		}
+
+		feature := Feature{}
+		err = f.Scan(&feature.Id, &feature.Name, &feature.Description, &feature.Lvl)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, newMessage("Feature not found."))
+		}
+
+		return c.JSON(http.StatusOK, feature)
+	})
+
 	e.Logger.Fatal(e.Start(":4000"))
+}
+
+func openDB(file string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
 }
