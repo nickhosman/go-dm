@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
-	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 type User struct {
@@ -40,8 +39,6 @@ func newMessage(content string) Message {
 	}
 }
 
-var Characters = make(map[int]Character)
-
 func newCharacter(id int, name string, lvl int, player User) Character {
 	c := Character{
 		Id: id,
@@ -49,8 +46,6 @@ func newCharacter(id int, name string, lvl int, player User) Character {
 		Lvl: lvl,
 		Player: player,
 	}
-
-	Characters[c.Id] = c
 
 	return c
 }
@@ -104,7 +99,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -118,19 +113,6 @@ func main() {
 
 	e.GET("/character", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, char)
-	})
-
-	e.GET("/character/:id", func(c echo.Context) error {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			return err
-		}
-
-		if Characters[id].Id > 0 {
-			return c.JSON(http.StatusOK, Characters[id])
-		}
-
-		return c.JSON(http.StatusNotFound, newMessage("Character not found."))
 	})
 
 	e.Logger.Fatal(e.Start(":4000"))
