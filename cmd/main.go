@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -27,7 +29,7 @@ type Character struct {
 	Name   string `json:"name"`
 	Lvl    int `json:"lvl"`
 	Player User `json:"player"`
-	Class []Class
+	Class Class
 }
 
 type Message struct {
@@ -40,16 +42,26 @@ func newMessage(content string) Message {
 	}
 }
 
-func newCharacter(id int, name string, lvl int, player User) Character {
+func newCharacter(id int, name string, lvl int, class Class, player User) Character {
 	c := Character{
 		Id: id,
 		Name: name,
 		Lvl: lvl,
 		Player: player,
+		Class: class,
 	}
 
 	return c
 }
+
+func GetCharHealth(c Character) int {
+	die := c.Class.Hitdie
+
+	hp := die + (int(math.Ceil(float64(die / 2))) * c.Lvl)
+
+	return hp
+}
+
 
 type Feature struct {
 	Id			int `json:"id"`
@@ -95,7 +107,11 @@ func main() {
 	e.Use(middleware.Logger())
 
 	u := newUser(1, "knocknix")
-	char := newCharacter(1, "Drig", 1, u)
+	cl := newClass(1, "Rogue", 8)
+	char := newCharacter(1, "Drig", 1, cl, u)
+
+	health := GetCharHealth(char)
+	fmt.Println("HEALTH:", health)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, u)
