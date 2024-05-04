@@ -27,6 +27,7 @@ type Character struct {
 	Name   string `json:"name"`
 	Lvl    int `json:"lvl"`
 	Player User `json:"player"`
+	Class []Class
 }
 
 type Message struct {
@@ -73,7 +74,7 @@ type Class struct {
 	Lvl 	 int `json:"lvl"`
 }
 
-func newClass(id int, name string, hitdie int, features []Feature) Class {
+func newClass(id int, name string, hitdie int) Class {
 	return Class {
 		Id: id,
 		Name: name,
