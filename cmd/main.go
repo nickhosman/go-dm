@@ -24,12 +24,49 @@ func newUser(id int, username string) User {
 	}
 }
 
+type Stat struct {
+	Id  int
+	Val int
+}
+
+func (s *Stat) GetMod() int {
+	return int(math.Floor(float64((s.Val - 10) / 2)))
+}
+
+func newStat(id, val int) Stat {
+	return Stat{
+		Id: id,
+		Val: val,
+	}
+}
+
+type Stats struct {
+	Str Stat
+	Dex Stat
+	Con Stat
+	Int Stat
+	Wis Stat
+	Cha Stat
+}
+
+func newStats(str, dex, con, intel, wis, cha Stat) Stats {
+	return Stats{
+		Str: str,
+		Dex: dex,
+		Con: con,
+		Int: intel,
+		Wis: wis,
+		Cha: cha,
+	}
+}
+
 type Character struct {
-	Id 	   int `json:"id"`
-	Name   string `json:"name"`
-	Lvl    int `json:"lvl"`
-	Player User `json:"player"`
-	Class Class
+	Id 	    int `json:"id"`
+	Name    string `json:"name"`
+	Lvl     int `json:"lvl"`
+	Stats   Stats
+	Classes []Class
+	Player  User `json:"player"`
 }
 
 type Message struct {
@@ -42,26 +79,18 @@ func newMessage(content string) Message {
 	}
 }
 
-func newCharacter(id int, name string, lvl int, class Class, player User) Character {
+func newCharacter(id int, name string, lvl int, stats Stats, classes []Class, player User) Character {
 	c := Character{
 		Id: id,
 		Name: name,
 		Lvl: lvl,
+		Stats: stats,
+		Classes: classes,
 		Player: player,
-		Class: class,
 	}
 
 	return c
 }
-
-func GetCharHealth(c Character) int {
-	die := c.Class.Hitdie
-
-	hp := die + (int(math.Ceil(float64(die / 2))) * c.Lvl)
-
-	return hp
-}
-
 
 type Feature struct {
 	Id			int `json:"id"`
@@ -109,9 +138,6 @@ func main() {
 	u := newUser(1, "knocknix")
 	cl := newClass(1, "Rogue", 8)
 	char := newCharacter(1, "Drig", 1, cl, u)
-
-	health := GetCharHealth(char)
-	fmt.Println("HEALTH:", health)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, u)
