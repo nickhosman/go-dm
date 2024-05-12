@@ -98,4 +98,20 @@ func NewClassFeature(id int, class Class, feature Feature) ClassFeature {
 	}
 }
 
+type Campaign struct {
+	Id 			int
+	Name 		string
+	Description string
+	Characters 	[]Character
+	GameMaster 	User
+}
 
+func NewCampaign(id int, name, description string, characters []Character, gameMaster User) Campaign {
+	return Campaign{
+		Id: id,
+		Name: name,
+		Description: description,
+		Characters: characters,
+		GameMaster: gameMaster,
+	}
+}
