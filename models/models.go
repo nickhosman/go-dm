@@ -83,3 +83,9 @@ type Character struct {
 	Classes []Class
 	Player 	User
 }
+
+type ClassFeature struct {
+	Id 			int
+	Class 		Class
+	Feature 	Feature
+}
