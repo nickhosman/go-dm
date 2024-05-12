@@ -89,3 +89,13 @@ type ClassFeature struct {
 	Class 		Class
 	Feature 	Feature
 }
+
+func NewClassFeature(id int, class Class, feature Feature) ClassFeature {
+	return ClassFeature{
+		Id: id,
+		Class: class,
+		Feature: feature,
+	}
+}
+
+
